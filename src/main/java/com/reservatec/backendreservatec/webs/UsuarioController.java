@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
-@Validated
+@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     private final AuthenticationService authenticationService;
