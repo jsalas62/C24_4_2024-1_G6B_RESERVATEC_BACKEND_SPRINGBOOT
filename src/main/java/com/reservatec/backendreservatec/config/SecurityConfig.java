@@ -9,6 +9,12 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -18,7 +24,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler("/api/user/check");
 
-        http
+        return http
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/login").permitAll();
                     auth.requestMatchers("/api/user/**").authenticated();
@@ -37,14 +43,22 @@ public class SecurityConfig {
                         .clearAuthentication(true))
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(successHandler))
+                .cors(cors -> cors
+                        .configurationSource(request -> {
+                            CorsConfiguration config = new CorsConfiguration();
+                            config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+                            config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                            config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+                            return config;
+                        }))
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/api/user/check", true)
-                        .permitAll());
-
-        return http.build();
+                        .permitAll())
+                .build();
     }
+
 
     @Bean
     public SessionRegistry sessionRegistry() {
