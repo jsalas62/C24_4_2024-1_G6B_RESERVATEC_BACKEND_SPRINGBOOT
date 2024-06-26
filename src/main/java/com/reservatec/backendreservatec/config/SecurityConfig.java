@@ -27,9 +27,9 @@ public class SecurityConfig {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/login").permitAll(); // Permitir acceso a /login para todos
-                    auth.requestMatchers("/api/user/**").authenticated(); // Requiere autenticación para cualquier otra ruta de la API
-                    auth.anyRequest().authenticated(); // Todas las demás rutas requieren autenticación
+                    auth.requestMatchers("/login").permitAll();
+                    auth.requestMatchers("/api/user/**").authenticated();
+                    auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)

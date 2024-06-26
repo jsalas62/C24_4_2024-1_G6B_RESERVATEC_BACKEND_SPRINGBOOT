@@ -20,6 +20,6 @@ public class HorarioServiceImpl implements HorarioService {
 
     @Override
     public List<Horario> findAllHorarios() {
-        return (List<Horario>) horarioRepository.findAll();
+        return horarioRepository.findAll();
     }
 }

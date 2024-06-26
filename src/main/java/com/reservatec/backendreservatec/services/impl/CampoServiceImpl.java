@@ -20,6 +20,6 @@ public class CampoServiceImpl implements CampoService {
 
     @Override
     public List<Campo> findAllCampos() {
-        return (List<Campo>) campoRepository.findAll();
+        return campoRepository.findAll();
     }
 }
