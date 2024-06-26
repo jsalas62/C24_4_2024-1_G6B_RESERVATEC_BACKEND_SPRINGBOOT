@@ -101,7 +101,7 @@ public class ReservaServiceImpl implements ReservaService {
 
         reservaRepository.save(reserva);
     }
-
+    
     @Override
     public List<Reserva> findReservasByUsuario(Long usuarioId) {
         return reservaRepository.findByUsuarioId(usuarioId);
