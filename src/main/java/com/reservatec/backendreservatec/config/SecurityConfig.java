@@ -22,7 +22,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler("http://localhost:3000/home");
+        SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler("/api/user/check");
 
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .expiredUrl("/login?error=session_expired"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("http://localhost:3000/login")
+                        .logoutSuccessUrl("/login")
                         .deleteCookies("JSESSIONID")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true))
@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("http://localhost:3000/home", true)
+                        .defaultSuccessUrl("/api/user/check", true)
                         .permitAll())
                 .build();
     }
@@ -55,7 +55,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://balanced-delight-production.up.railway.app"));
+        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);
