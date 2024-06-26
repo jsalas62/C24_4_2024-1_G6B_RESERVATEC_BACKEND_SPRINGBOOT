@@ -1,10 +1,8 @@
 package com.reservatec.backendreservatec.webs;
 
 import com.reservatec.backendreservatec.domains.UsuarioTO;
-import com.reservatec.backendreservatec.entities.Carrera;
 import com.reservatec.backendreservatec.entities.Usuario;
 import com.reservatec.backendreservatec.services.AuthenticationService;
-import com.reservatec.backendreservatec.services.CarreraService;
 import com.reservatec.backendreservatec.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +22,12 @@ public class UsuarioController {
 
     private final AuthenticationService authenticationService;
     private final UsuarioService usuarioService;
-    private final CarreraService carreraService;
 
     @Autowired
     public UsuarioController(AuthenticationService authenticationService,
-                             UsuarioService usuarioService,
-                             CarreraService carreraService) {
+                             UsuarioService usuarioService) {
         this.authenticationService = authenticationService;
         this.usuarioService = usuarioService;
-        this.carreraService = carreraService;
     }
 
     @GetMapping("/check")
@@ -68,11 +63,7 @@ public class UsuarioController {
     @PostMapping("/register")
     public ResponseEntity<UsuarioTO> submitUserForm(@Valid @RequestBody UsuarioTO usuarioTO) {
         try {
-            validateCarrera(usuarioTO);
-
             Usuario usuario = authenticationService.convertToEntity(usuarioTO);
-            usuario.setCarrera(carreraService.findById(usuarioTO.getCarrera().getId()).get());
-
             usuarioService.saveUsuario(usuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioTO);
         } catch (IllegalArgumentException e) {
@@ -85,28 +76,13 @@ public class UsuarioController {
     @PutMapping("/profile")
     public ResponseEntity<UsuarioTO> updateProfile(@Valid @RequestBody UsuarioTO usuarioTO) {
         try {
-            validateCarrera(usuarioTO);
-
             Usuario usuario = authenticationService.convertToEntity(usuarioTO);
-            usuario.setCarrera(carreraService.findById(usuarioTO.getCarrera().getId()).get());
-
             usuarioService.updateUsuario(usuario);
             return ResponseEntity.ok(usuarioTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
-    private void validateCarrera(UsuarioTO usuarioTO) {
-        if (usuarioTO.getCarrera() == null || usuarioTO.getCarrera().getId() == null) {
-            throw new IllegalArgumentException("Carrera no proporcionada o inválida.");
-        }
-
-        Optional<Carrera> carreraOpt = carreraService.findById(usuarioTO.getCarrera().getId());
-        if (carreraOpt.isEmpty()) {
-            throw new IllegalArgumentException("Carrera no encontrada.");
         }
     }
 }

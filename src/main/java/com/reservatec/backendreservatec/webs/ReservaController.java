@@ -35,10 +35,10 @@ public class ReservaController {
     }
 
     @PostMapping("/nueva")
-    public ResponseEntity<ReservaTO> submitReservaForm(@RequestBody ReservaTO reservaTO, OAuth2AuthenticationToken token, Authentication authentication) {
+    public ResponseEntity<?> submitReservaForm(@RequestBody ReservaTO reservaTO, OAuth2AuthenticationToken token, Authentication authentication) {
         Optional<Usuario> usuario = authenticationService.getAuthenticatedUser(authentication, token);
         if (usuario.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autorizado.");
         }
 
         Reserva reserva = reservaMapper.toEntity(reservaTO);
@@ -48,8 +48,10 @@ public class ReservaController {
             reservaService.crearReserva(reserva);
             ReservaTO savedReservaTO = reservaMapper.toTO(reserva);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedReservaTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor.");
         }
     }
 
@@ -64,5 +66,4 @@ public class ReservaController {
         List<ReservaTO> reservaTOs = reservas.stream().map(reservaMapper::toTO).collect(Collectors.toList());
         return ResponseEntity.ok(reservaTOs);
     }
-
 }
