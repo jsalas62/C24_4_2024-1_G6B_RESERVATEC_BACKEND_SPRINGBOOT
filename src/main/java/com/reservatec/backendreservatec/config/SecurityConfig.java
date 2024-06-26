@@ -22,7 +22,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler("/api/user/check");
+        SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler("http://localhost:3000/home");
 
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .expiredUrl("/login?error=session_expired"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
+                        .logoutSuccessUrl("http://localhost:3000/login")
                         .deleteCookies("JSESSIONID")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true))
@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/api/user/check", true)
+                        .defaultSuccessUrl("http://localhost:3000/home", true)
                         .permitAll())
                 .build();
     }
