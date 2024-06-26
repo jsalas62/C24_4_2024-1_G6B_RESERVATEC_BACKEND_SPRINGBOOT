@@ -14,7 +14,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
+
 
 @Configuration
 @EnableWebSecurity
@@ -25,6 +25,7 @@ public class SecurityConfig {
         SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler("/api/user/check");
 
         return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/login").permitAll();
                     auth.requestMatchers("/api/user/**").authenticated();
@@ -43,14 +44,6 @@ public class SecurityConfig {
                         .clearAuthentication(true))
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(successHandler))
-                .cors(cors -> cors
-                        .configurationSource(request -> {
-                            CorsConfiguration config = new CorsConfiguration();
-                            config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-                            config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                            config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-                            return config;
-                        }))
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form
                         .loginPage("/login")
@@ -59,6 +52,18 @@ public class SecurityConfig {
                 .build();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://balanced-delight-production.up.railway.app"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
     @Bean
     public SessionRegistry sessionRegistry() {
