@@ -56,6 +56,7 @@ public class ReservaController {
         }
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/misreservas")
     public ResponseEntity<List<ReservaTO>> getMisReservas(OAuth2AuthenticationToken token, Authentication authentication) {
         Optional<Usuario> usuario = authenticationService.getAuthenticatedUser(authentication, token);
