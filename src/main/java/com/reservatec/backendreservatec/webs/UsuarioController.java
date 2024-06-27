@@ -17,7 +17,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/user")
 @CrossOrigin(origins = {"http://localhost:3000", "https://balanced-delight-production.up.railway.app"}, allowCredentials = "true")
-
 public class UsuarioController {
 
     private final AuthenticationService authenticationService;
