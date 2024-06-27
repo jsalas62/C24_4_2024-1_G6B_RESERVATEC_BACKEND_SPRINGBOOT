@@ -9,7 +9,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,36 +23,30 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler();
-        successHandler.setDefaultTargetUrl("http://localhost:3000");
-
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/public/**").permitAll(); // Permitir acceso a rutas públicas
-                    auth.requestMatchers("/favicon.ico").permitAll(); // Permitir acceso a /favicon.ico
-                    auth.anyRequest().authenticated(); // Cualquier otra solicitud requiere autenticación
+                    auth.requestMatchers("**").permitAll();
+                    auth.requestMatchers("/favicon.ico").permitAll();
+                    auth.anyRequest().authenticated();
                 })
+
                 .sessionManagement(session -> session
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
-                        .invalidSessionUrl("/login?error=invalid_session")
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                         .maximumSessions(1)
                         .sessionRegistry(sessionRegistry())
-                        .expiredUrl("/login?error=session_expired")
                         .maxSessionsPreventsLogin(false)
-                )
-                .csrf(csrf -> csrf.disable())
+                        .expiredUrl("/login?error=session_expired"))
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutSuccessUrl("/login")
                         .deleteCookies("JSESSIONID")
                         .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(successHandler)
-                )
+                        .clearAuthentication(true))
+                .csrf(csrf -> csrf.disable())
+                .oauth2Login(withDefaults())
                 .formLogin(withDefaults())
                 .build();
     }
