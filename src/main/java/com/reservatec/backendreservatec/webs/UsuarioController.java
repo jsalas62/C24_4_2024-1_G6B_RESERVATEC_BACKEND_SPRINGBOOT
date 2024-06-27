@@ -8,10 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 @RestController
@@ -20,6 +26,10 @@ import java.util.Optional;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final SecurityContextHolderStrategy contextHolderStrategy =
+            SecurityContextHolder.getContextHolderStrategy();
+    private final HttpSessionSecurityContextRepository securityContextRepository =
+            new HttpSessionSecurityContextRepository();
 
     @Autowired
     public UsuarioController(UsuarioService usuarioService) {
@@ -52,7 +62,9 @@ public class UsuarioController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UsuarioTO> submitUserForm(@Valid @RequestBody UsuarioTO usuarioTO) {
+    public ResponseEntity<UsuarioTO> submitUserForm(@Valid @RequestBody UsuarioTO usuarioTO,
+                                                    HttpServletRequest request, HttpServletResponse response,
+                                                    Authentication authentication) {
         try {
             Usuario usuario = new Usuario();
             usuario.setNombres(usuarioTO.getNombres());
@@ -61,6 +73,12 @@ public class UsuarioController {
             usuario.setCarrera(usuarioTO.getCarrera());
             // Set other default fields (estado, rol, etc.) as necessary
             usuarioService.saveUsuario(usuario);
+
+            // Autenticar al usuario y guardar el contexto de seguridad en la sesión
+            var securityContext = this.contextHolderStrategy.createEmptyContext();
+            securityContext.setAuthentication(authentication);
+            this.securityContextRepository.saveContext(securityContext, (jakarta.servlet.http.HttpServletRequest) request, (jakarta.servlet.http.HttpServletResponse) response);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
