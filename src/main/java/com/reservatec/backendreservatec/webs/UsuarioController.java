@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -27,19 +26,6 @@ public class UsuarioController {
                              UsuarioService usuarioService) {
         this.authenticationService = authenticationService;
         this.usuarioService = usuarioService;
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<Void> checkUserStatus(OAuth2AuthenticationToken token, Authentication authentication) {
-        if (!authenticationService.isAuthenticated(authentication)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String email = token.getPrincipal().getAttribute("email");
-        boolean usuarioRegistrado = usuarioService.existsByEmail(email);
-
-        String redirectUrl = usuarioRegistrado ? "http://localhost:3000/home" : "http://localhost:3000/register";
-        return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
     }
 
     @GetMapping("/profile")
