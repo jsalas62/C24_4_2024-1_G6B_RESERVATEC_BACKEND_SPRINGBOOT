@@ -1,9 +1,11 @@
 package com.reservatec.backendreservatec.services.impl;
 
+import com.reservatec.backendreservatec.domains.ReservaTO;
 import com.reservatec.backendreservatec.entities.Campo;
 import com.reservatec.backendreservatec.entities.Estado;
 import com.reservatec.backendreservatec.entities.Horario;
 import com.reservatec.backendreservatec.entities.Reserva;
+import com.reservatec.backendreservatec.mappers.ReservaMapper;
 import com.reservatec.backendreservatec.repositories.CampoRepository;
 import com.reservatec.backendreservatec.repositories.EstadoRepository;
 import com.reservatec.backendreservatec.repositories.HorarioRepository;
@@ -20,6 +22,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservaServiceImpl implements ReservaService {
@@ -28,17 +31,20 @@ public class ReservaServiceImpl implements ReservaService {
     private final EstadoRepository estadoRepository;
     private final CampoRepository campoRepository;
     private final HorarioRepository horarioRepository;
+    private final ReservaMapper reservaMapper;
 
     @Autowired
     public ReservaServiceImpl(
             ReservaRepository reservaRepository,
             EstadoRepository estadoRepository,
             CampoRepository campoRepository,
-            HorarioRepository horarioRepository) {
+            HorarioRepository horarioRepository,
+            ReservaMapper reservaMapper) {
         this.reservaRepository = reservaRepository;
         this.estadoRepository = estadoRepository;
         this.campoRepository = campoRepository;
         this.horarioRepository = horarioRepository;
+        this.reservaMapper = reservaMapper;
 
         // Establecer zona horaria por defecto a America/Lima
         TimeZone.setDefault(TimeZone.getTimeZone("America/Lima"));
@@ -105,6 +111,14 @@ public class ReservaServiceImpl implements ReservaService {
     @Override
     public List<Reserva> findReservasByUsuario(Long usuarioId) {
         return reservaRepository.findByUsuarioId(usuarioId);
+    }
+
+    @Override
+    public List<ReservaTO> getAllReservas() {
+        List<Reserva> reservas = reservaRepository.findAll();
+        return reservas.stream()
+                .map(reservaMapper::toTO)
+                .collect(Collectors.toList());
     }
 
     @Scheduled(fixedRate = 10000) // Ejecutar cada 10 segundos (10000 milisegundos)

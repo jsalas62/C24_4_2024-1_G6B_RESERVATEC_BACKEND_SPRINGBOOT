@@ -16,4 +16,5 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByUsuarioIdAndEstadoNombre(Long usuarioId, String estadoNombre);
     List<Reserva> findByEstadoNombre(String estadoNombre);
 
+    List<Reserva> findAll(); // Aunque esto ya está implícito en JpaRepository
 }

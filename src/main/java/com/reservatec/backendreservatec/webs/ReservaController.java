@@ -63,8 +63,12 @@ public class ReservaController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        // Llamar al método actualizarReservas antes de obtener las reservas
+        reservaService.actualizarReservas();
+
         List<Reserva> reservas = reservaService.findReservasByUsuario(usuario.get().getId());
         List<ReservaTO> reservaTOs = reservas.stream().map(reservaMapper::toTO).collect(Collectors.toList());
         return ResponseEntity.ok(reservaTOs);
     }
+
 }
