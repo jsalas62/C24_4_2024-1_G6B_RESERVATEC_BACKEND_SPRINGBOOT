@@ -23,8 +23,11 @@ public class SecurityConfig {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/**", "/oauth2/**").permitAll() // Permitir acceso público a estas rutas
                         .requestMatchers("/**").permitAll() // Permitir acceso público a todas las rutas
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")  // Página de inicio de sesión personalizada
+                        .defaultSuccessUrl("http://localhost:3000/home", true) // URL de redirección después del inicio de sesión exitoso
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
