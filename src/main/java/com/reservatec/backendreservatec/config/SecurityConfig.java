@@ -26,8 +26,7 @@ public class SecurityConfig {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/oauth2/**", "/reservas").permitAll() // Permitir acceso público a estas rutas
-                        .requestMatchers("/api/user/**").authenticated() // Requiere autenticación para todas las rutas /api/user/**
+                        .requestMatchers("/").permitAll() // Permitir acceso público a estas rutas
                         .anyRequest().authenticated() // Requiere autenticación para cualquier otra ruta
                 )
                 .oauth2Login(oauth2 -> oauth2
