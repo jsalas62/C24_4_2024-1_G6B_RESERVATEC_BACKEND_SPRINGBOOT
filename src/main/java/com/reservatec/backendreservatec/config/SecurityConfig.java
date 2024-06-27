@@ -8,7 +8,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,17 +20,11 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler("http://localhost:3000/home");
-
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll() // Permitir acceso público a estas rutas
-                        //.requestMatchers("/api/user/**").authenticated() // Requiere autenticación para todas las rutas /api/user/**
-                        //.anyRequest().authenticated() // Requiere autenticación para cualquier otra ruta
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(successHandler)
+                        .requestMatchers("/api/user/**", "/oauth2/**").permitAll() // Permitir acceso público a estas rutas
+                        .requestMatchers("/**").permitAll() // Permitir acceso público a todas las rutas
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
