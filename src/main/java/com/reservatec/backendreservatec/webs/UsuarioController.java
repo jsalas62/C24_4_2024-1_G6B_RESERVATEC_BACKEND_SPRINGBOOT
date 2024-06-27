@@ -2,6 +2,7 @@ package com.reservatec.backendreservatec.webs;
 
 import com.reservatec.backendreservatec.domains.UsuarioTO;
 import com.reservatec.backendreservatec.entities.Usuario;
+import com.reservatec.backendreservatec.mappers.UsuarioMapper;
 import com.reservatec.backendreservatec.services.AuthenticationService;
 import com.reservatec.backendreservatec.services.UsuarioService;
 import jakarta.validation.Valid;
@@ -13,42 +14,58 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
-@Validated
+
 public class UsuarioController {
 
     private final AuthenticationService authenticationService;
     private final UsuarioService usuarioService;
 
+    private final UsuarioMapper usuarioMapper;
     @Autowired
     public UsuarioController(AuthenticationService authenticationService,
-                             UsuarioService usuarioService) {
+                             UsuarioService usuarioService, UsuarioMapper usuarioMapper) {
         this.authenticationService = authenticationService;
         this.usuarioService = usuarioService;
+        this.usuarioMapper = usuarioMapper;
     }
-    
+
     @GetMapping("/profile")
-    public ResponseEntity<UsuarioTO> getProfileForm(OAuth2AuthenticationToken token, Authentication authentication) {
-        if (!authenticationService.isAuthenticated(authentication)) {
+    public ResponseEntity<UsuarioTO> getProfileForm(OAuth2AuthenticationToken token) {
+        if (token == null || !token.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Optional<UsuarioTO> usuarioTO = authenticationService.getUserFromToken(token);
-        if (usuarioTO.isEmpty()) {
-            UsuarioTO newUserTO = new UsuarioTO();
-            newUserTO.setNombres(token.getPrincipal().getAttribute("name"));
-            newUserTO.setEmail(token.getPrincipal().getAttribute("email"));
-            return ResponseEntity.ok(newUserTO);
+        Map<String, Object> attributes = token.getPrincipal().getAttributes();
+        String email = (String) attributes.get("email");
+        String name = (String) attributes.get("name");
+
+        Optional<Usuario> usuarioOpt = usuarioService.findByEmail(email);
+        UsuarioTO usuarioTO;
+
+        if (usuarioOpt.isEmpty()) {
+            // Crear un nuevo UsuarioTO si no existe el usuario
+            usuarioTO = new UsuarioTO();
+            usuarioTO.setNombres(name);
+            usuarioTO.setEmail(email);
+        } else {
+            // Convertir Usuario a UsuarioTO
+            Usuario usuario = usuarioOpt.get();
+            usuarioTO = usuarioMapper.toTO(usuario);
         }
 
-        return ResponseEntity.ok(usuarioTO.get());
+        return ResponseEntity.ok(usuarioTO);
     }
 
+
+
+
     @PostMapping("/register")
-    public ResponseEntity<UsuarioTO> submitUserForm(@Valid @RequestBody UsuarioTO usuarioTO) {
+    public ResponseEntity<UsuarioTO> submitUserForm( @RequestBody UsuarioTO usuarioTO) {
         try {
             Usuario usuario = authenticationService.convertToEntity(usuarioTO);
             usuarioService.saveUsuario(usuario);
@@ -61,7 +78,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<UsuarioTO> updateProfile(@Valid @RequestBody UsuarioTO usuarioTO) {
+    public ResponseEntity<UsuarioTO> updateProfile( @RequestBody UsuarioTO usuarioTO) {
         try {
             Usuario usuario = authenticationService.convertToEntity(usuarioTO);
             usuarioService.updateUsuario(usuario);
@@ -72,4 +89,6 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+
 }

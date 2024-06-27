@@ -52,7 +52,7 @@ public class ReservaServiceImpl implements ReservaService {
 
     @Override
     @Transactional
-    public void crearReserva(Reserva reserva) throws Exception {
+    public void crearReserva(Reserva reserva) {
         LocalDateTime now = LocalDateTime.now();
         LocalDate today = now.toLocalDate();
         LocalTime currentTime = now.toLocalTime();
@@ -112,6 +112,8 @@ public class ReservaServiceImpl implements ReservaService {
     public List<Reserva> findReservasByUsuario(Long usuarioId) {
         return reservaRepository.findByUsuarioId(usuarioId);
     }
+
+
 
     @Override
     public List<ReservaTO> getAllReservas() {

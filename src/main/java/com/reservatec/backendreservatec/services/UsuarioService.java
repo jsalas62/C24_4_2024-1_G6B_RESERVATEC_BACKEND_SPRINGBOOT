@@ -10,4 +10,6 @@ public interface UsuarioService {
     void updateUsuario(Usuario usuario);
 
     boolean existsByEmail(String email);
+
+
 }
