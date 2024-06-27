@@ -2,7 +2,6 @@ package com.reservatec.backendreservatec.webs;
 
 import com.reservatec.backendreservatec.domains.UsuarioTO;
 import com.reservatec.backendreservatec.entities.Usuario;
-import com.reservatec.backendreservatec.services.AuthenticationService;
 import com.reservatec.backendreservatec.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,50 +19,47 @@ import java.util.Optional;
 @Validated
 public class UsuarioController {
 
-    private final AuthenticationService authenticationService;
     private final UsuarioService usuarioService;
 
     @Autowired
-    public UsuarioController(AuthenticationService authenticationService,
-                             UsuarioService usuarioService) {
-        this.authenticationService = authenticationService;
+    public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<Void> checkUserStatus(OAuth2AuthenticationToken token, Authentication authentication) {
-        if (!authenticationService.isAuthenticated(authentication)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String email = token.getPrincipal().getAttribute("email");
-        boolean usuarioRegistrado = usuarioService.existsByEmail(email);
-
-        String redirectUrl = usuarioRegistrado ? "http://localhost:3000/home" : "http://localhost:3000/register";
-        return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
     }
 
     @GetMapping("/profile")
     public ResponseEntity<UsuarioTO> getProfileForm(OAuth2AuthenticationToken token, Authentication authentication) {
-        if (!authenticationService.isAuthenticated(authentication)) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Optional<UsuarioTO> usuarioTO = authenticationService.getUserFromToken(token);
-        if (usuarioTO.isEmpty()) {
+        String email = token.getPrincipal().getAttribute("email");
+        Optional<Usuario> usuarioOpt = usuarioService.findByEmail(email);
+
+        if (usuarioOpt.isEmpty()) {
             UsuarioTO newUserTO = new UsuarioTO();
             newUserTO.setNombres(token.getPrincipal().getAttribute("name"));
-            newUserTO.setEmail(token.getPrincipal().getAttribute("email"));
+            newUserTO.setEmail(email);
             return ResponseEntity.ok(newUserTO);
         }
 
-        return ResponseEntity.ok(usuarioTO.get());
+        Usuario usuario = usuarioOpt.get();
+        UsuarioTO usuarioTO = new UsuarioTO();
+        usuarioTO.setNombres(usuario.getNombres());
+        usuarioTO.setEmail(usuario.getEmail());
+        usuarioTO.setCodigoTecsup(usuario.getCodigoTecsup());
+        usuarioTO.setCarrera(usuario.getCarrera());
+        return ResponseEntity.ok(usuarioTO);
     }
 
     @PostMapping("/register")
     public ResponseEntity<UsuarioTO> submitUserForm(@Valid @RequestBody UsuarioTO usuarioTO) {
         try {
-            Usuario usuario = authenticationService.convertToEntity(usuarioTO);
+            Usuario usuario = new Usuario();
+            usuario.setNombres(usuarioTO.getNombres());
+            usuario.setEmail(usuarioTO.getEmail());
+            usuario.setCodigoTecsup(usuarioTO.getCodigoTecsup());
+            usuario.setCarrera(usuarioTO.getCarrera());
+            // Set other default fields (estado, rol, etc.) as necessary
             usuarioService.saveUsuario(usuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioTO);
         } catch (IllegalArgumentException e) {
@@ -76,7 +72,15 @@ public class UsuarioController {
     @PutMapping("/profile")
     public ResponseEntity<UsuarioTO> updateProfile(@Valid @RequestBody UsuarioTO usuarioTO) {
         try {
-            Usuario usuario = authenticationService.convertToEntity(usuarioTO);
+            Optional<Usuario> usuarioOpt = usuarioService.findByEmail(usuarioTO.getEmail());
+            if (usuarioOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            Usuario usuario = usuarioOpt.get();
+            usuario.setNombres(usuarioTO.getNombres());
+            usuario.setCodigoTecsup(usuarioTO.getCodigoTecsup());
+            usuario.setCarrera(usuarioTO.getCarrera());
+            // Update other fields as necessary
             usuarioService.updateUsuario(usuario);
             return ResponseEntity.ok(usuarioTO);
         } catch (IllegalArgumentException e) {
