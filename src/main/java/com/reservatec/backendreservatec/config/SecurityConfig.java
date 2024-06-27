@@ -26,12 +26,15 @@ public class SecurityConfig {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/api/user/profile", "/api/user/register", "/oauth2/**").permitAll() // Permitir acceso público
-                        .requestMatchers("/api/**").authenticated() // Requiere autenticación para /api/**
+                        .requestMatchers("/login", "/api/user/profile", "/api/user/register", "/oauth2/**").permitAll() // Permitir acceso público a estas rutas
+                        .requestMatchers("/api/**").authenticated() // Requiere autenticación para todas las rutas /api/**
                         .anyRequest().authenticated() // Requiere autenticación para cualquier otra ruta
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
                         .successHandler(successHandler)
+                        .defaultSuccessUrl("http://localhost:3000/home", true)
+                        .permitAll()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -55,7 +58,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://192.168.18.36:3000","https://balanced-delight-production.up.railway.app"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://balanced-delight-production.up.railway.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);
