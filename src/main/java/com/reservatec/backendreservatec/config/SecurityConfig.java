@@ -25,6 +25,9 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler();
+        successHandler.setDefaultTargetUrl("/api/user/check");
+
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
@@ -46,17 +49,8 @@ public class SecurityConfig {
                         .clearAuthentication(true))
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/google")
-                        .successHandler((request, response, authentication) -> {
-                            String clientType = request.getParameter("client_type");
-                            if ("mobile".equals(clientType)) {
-                                String sessionId = request.getSession().getId();
-                                String redirectUrl = "com.salas.jorge.laboratoriocalificado03://auth?sessionCookie=" + sessionId;
-                                response.sendRedirect(redirectUrl);
-                            } else {
-                                response.sendRedirect("/api/user/check");
-                            }
-                        })
+                        .loginPage("/oauth2/authorization/google") // Redirige directamente a la URL de autorización
+                        .successHandler(successHandler)
                 )
                 .formLogin(withDefaults())
                 .build();
@@ -84,7 +78,7 @@ public class SecurityConfig {
     public DefaultCookieSerializer cookieSerializer() {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
         serializer.setSameSite("None");
-        serializer.setUseSecureCookie(true);
+        serializer.setUseSecureCookie(true); // Asegúrate de que esto esté en true si usas HTTPS
         return serializer;
     }
 }
