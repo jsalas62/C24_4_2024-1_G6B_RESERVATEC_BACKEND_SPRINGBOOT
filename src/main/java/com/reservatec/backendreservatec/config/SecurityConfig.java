@@ -25,8 +25,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler();
-        successHandler.setDefaultTargetUrl("/api/user/check");
+        CustomAuthenticationSuccessHandler successHandler = new CustomAuthenticationSuccessHandler();
 
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -49,12 +48,13 @@ public class SecurityConfig {
                         .clearAuthentication(true))
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/google") // Redirige directamente a la URL de autorización
+                        .loginPage("/oauth2/authorization/google")
                         .successHandler(successHandler)
                 )
                 .formLogin(withDefaults())
                 .build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

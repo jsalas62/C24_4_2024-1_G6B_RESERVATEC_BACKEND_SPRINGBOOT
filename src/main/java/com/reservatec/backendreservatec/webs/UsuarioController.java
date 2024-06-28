@@ -4,6 +4,7 @@ import com.reservatec.backendreservatec.domains.UsuarioTO;
 import com.reservatec.backendreservatec.entities.Usuario;
 import com.reservatec.backendreservatec.services.AuthenticationService;
 import com.reservatec.backendreservatec.services.UsuarioService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -31,23 +33,25 @@ public class UsuarioController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<Void> checkUserStatus(@RequestHeader(value = "X-Client-Type", required = false) String clientType, OAuth2AuthenticationToken token, Authentication authentication) {
+    public void checkUserStatus(@RequestParam(value = "client_type", required = false) String clientType,
+                                OAuth2AuthenticationToken token, Authentication authentication,
+                                HttpServletResponse response) throws IOException {
         if (!authenticationService.isAuthenticated(authentication)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
         String email = token.getPrincipal().getAttribute("email");
         boolean usuarioRegistrado = usuarioService.existsByEmail(email);
 
         if ("mobile".equals(clientType)) {
-            // Responder con 200 OK y no redireccionar para solicitudes móviles
-            return ResponseEntity.ok().build();
+            response.sendRedirect("com.salas.jorge.laboratoriocalificado03://auth");
         } else {
-            // Redireccionar para solicitudes web
             String redirectUrl = usuarioRegistrado ? "https://strong-laughter-production.up.railway.app" : "https://strong-laughter-production.up.railway.app/register";
-            return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
+            response.sendRedirect(redirectUrl);
         }
     }
+
 
     @GetMapping("/profile")
     public ResponseEntity<UsuarioTO> getProfileForm(OAuth2AuthenticationToken token, Authentication authentication) {
