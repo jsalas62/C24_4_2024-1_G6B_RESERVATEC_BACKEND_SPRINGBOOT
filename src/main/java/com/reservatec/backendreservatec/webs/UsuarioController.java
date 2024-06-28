@@ -4,6 +4,7 @@ import com.reservatec.backendreservatec.domains.UsuarioTO;
 import com.reservatec.backendreservatec.entities.Usuario;
 import com.reservatec.backendreservatec.services.AuthenticationService;
 import com.reservatec.backendreservatec.services.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class UsuarioController {
     @GetMapping("/check")
     public void checkUserStatus(@RequestParam(value = "client_type", required = false) String clientType,
                                 OAuth2AuthenticationToken token, Authentication authentication,
-                                HttpServletResponse response) throws IOException {
+                                HttpServletResponse response, HttpServletRequest request) throws IOException {
         if (!authenticationService.isAuthenticated(authentication)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -45,7 +46,10 @@ public class UsuarioController {
         boolean usuarioRegistrado = usuarioService.existsByEmail(email);
 
         if ("mobile".equals(clientType)) {
-            response.sendRedirect("com.salas.jorge.laboratoriocalificado03://auth");
+            String sessionId = request.getSession().getId();
+            String sessionCookie = request.getHeader("Cookie");
+            String redirectUrl = "com.salas.jorge.laboratoriocalificado03://auth?sessionCookie=" + sessionCookie;
+            response.sendRedirect(redirectUrl);
         } else {
             String redirectUrl = usuarioRegistrado ? "https://strong-laughter-production.up.railway.app" : "https://strong-laughter-production.up.railway.app/register";
             response.sendRedirect(redirectUrl);
