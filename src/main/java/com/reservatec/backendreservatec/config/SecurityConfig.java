@@ -26,7 +26,8 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler();
-        successHandler.setDefaultTargetUrl("https://strong-laughter-production.up.railway.app/");
+        successHandler.setDefaultTargetUrl("/api/user/check");
+
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
@@ -48,6 +49,7 @@ public class SecurityConfig {
                         .clearAuthentication(true))
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/oauth2/authorization/google") // Redirige directamente a la URL de autorización
                         .successHandler(successHandler)
                 )
                 .formLogin(withDefaults())
