@@ -1,6 +1,6 @@
 package com.reservatec.backendreservatec.config;
 
-import com.reservatec.backendreservatec.config.CustomAuthenticationSuccessHandler;
+import com.reservatec.backendreservatec.security.CustomAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .clearAuthentication(true))
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/google") // Redirige directamente a la URL de autorización
+                        .loginPage("/oauth2/authorization/google")
                         .successHandler(successHandler)
                 )
                 .formLogin(withDefaults())

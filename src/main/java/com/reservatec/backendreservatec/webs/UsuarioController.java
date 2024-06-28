@@ -31,7 +31,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<Void> checkUserStatus(OAuth2AuthenticationToken token, Authentication authentication) {
+    public ResponseEntity<Void> checkUserStatus(@RequestHeader(value = "X-Client-Type", required = false) String clientType, OAuth2AuthenticationToken token, Authentication authentication) {
         if (!authenticationService.isAuthenticated(authentication)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -39,8 +39,14 @@ public class UsuarioController {
         String email = token.getPrincipal().getAttribute("email");
         boolean usuarioRegistrado = usuarioService.existsByEmail(email);
 
-        String redirectUrl = usuarioRegistrado ? "https://strong-laughter-production.up.railway.app" : "https://strong-laughter-production.up.railway.app/register";
-        return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
+        if ("mobile".equals(clientType)) {
+            // Responder con 200 OK y no redireccionar para solicitudes móviles
+            return ResponseEntity.ok().build();
+        } else {
+            // Redireccionar para solicitudes web
+            String redirectUrl = usuarioRegistrado ? "https://strong-laughter-production.up.railway.app" : "https://strong-laughter-production.up.railway.app/register";
+            return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
+        }
     }
 
     @GetMapping("/profile")
