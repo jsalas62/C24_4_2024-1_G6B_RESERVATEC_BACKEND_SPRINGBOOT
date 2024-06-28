@@ -25,8 +25,6 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        CustomAuthenticationSuccessHandler successHandler = new CustomAuthenticationSuccessHandler();
-
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
@@ -36,7 +34,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(3)
+                        .maximumSessions(1)
                         .sessionRegistry(sessionRegistry())
                         .maxSessionsPreventsLogin(false)
                         .expiredUrl("/login?error=session_expired"))
@@ -49,12 +47,20 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/google")
-                        .successHandler(successHandler)
+                        .successHandler((request, response, authentication) -> {
+                            String clientType = request.getParameter("client_type");
+                            if ("mobile".equals(clientType)) {
+                                String sessionId = request.getSession().getId();
+                                String redirectUrl = "com.salas.jorge.laboratoriocalificado03://auth?sessionCookie=" + sessionId;
+                                response.sendRedirect(redirectUrl);
+                            } else {
+                                response.sendRedirect("/api/user/check");
+                            }
+                        })
                 )
                 .formLogin(withDefaults())
                 .build();
     }
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -78,7 +84,7 @@ public class SecurityConfig {
     public DefaultCookieSerializer cookieSerializer() {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
         serializer.setSameSite("None");
-        serializer.setUseSecureCookie(true); // Asegúrate de que esto esté en true si usas HTTPS
+        serializer.setUseSecureCookie(true);
         return serializer;
     }
 }
