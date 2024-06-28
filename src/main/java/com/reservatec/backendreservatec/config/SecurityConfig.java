@@ -71,12 +71,5 @@ public class SecurityConfig {
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
     }
-
-    @Bean
-    public DefaultCookieSerializer cookieSerializer() {
-        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setSameSite("None");
-        serializer.setUseSecureCookie(true); // Asegúrate de que esto esté en true si usas HTTPS
-        return serializer;
-    }
+    
 }
