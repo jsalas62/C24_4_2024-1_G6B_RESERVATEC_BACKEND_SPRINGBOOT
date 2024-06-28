@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(1)
+                        .maximumSessions(3)
                         .sessionRegistry(sessionRegistry())
                         .maxSessionsPreventsLogin(false)
                         .expiredUrl("/login?error=session_expired"))
