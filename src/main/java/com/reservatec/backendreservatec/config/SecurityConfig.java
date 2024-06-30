@@ -10,6 +10,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -24,9 +25,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler();
         successHandler.setDefaultTargetUrl("/api/user/check");
+
+        SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+        logoutSuccessHandler.setDefaultTargetUrl("/login");
 
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -43,23 +47,22 @@ public class SecurityConfig {
                         .expiredUrl("/login?error=session_expired"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
+                        .logoutSuccessHandler(logoutSuccessHandler) // Maneja la redirección después del logout
                         .deleteCookies("JSESSIONID")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true))
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/google") // Redirige directamente a la URL de autorización
-                        .successHandler(successHandler)
+                        .successHandler(successHandler) // Maneja la redirección después de un inicio de sesión exitoso
                 )
                 .formLogin(withDefaults())
                 .build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://balanced-delight-production.up.railway.app", "https://strong-laughter-production.up.railway.app"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173", "https://balanced-delight-production.up.railway.app", "https://strong-laughter-production.up.railway.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);

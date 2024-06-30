@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -42,9 +43,10 @@ public class UsuarioController {
         String email = token.getPrincipal().getAttribute("email");
         boolean usuarioRegistrado = usuarioService.existsByEmail(email);
 
-        String redirectUrl = usuarioRegistrado ? "https://strong-laughter-production.up.railway.app/inicio" : "https://strong-laughter-production.up.railway.app/register";
+        String redirectUrl = usuarioRegistrado ? "http://localhost:5173/inicio" : "http://localhost:5173/register";
         return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
     }
+
 
     @GetMapping("/profile")
     public ResponseEntity<UsuarioTO> getProfileForm(OAuth2AuthenticationToken token, Authentication authentication) {
