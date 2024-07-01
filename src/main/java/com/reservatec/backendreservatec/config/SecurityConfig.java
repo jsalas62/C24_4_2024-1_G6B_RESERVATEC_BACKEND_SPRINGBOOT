@@ -59,7 +59,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://balanced-delight-production.up.railway.app", "https://strong-laughter-production.up.railway.app"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://c24-4-2024-1-g6-b-reservatec-frontend-react.vercel.app", "https://balanced-delight-production.up.railway.app", "https://strong-laughter-production.up.railway.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);

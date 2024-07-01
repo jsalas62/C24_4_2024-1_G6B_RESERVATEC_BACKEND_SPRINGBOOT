@@ -43,7 +43,7 @@ public class UsuarioController {
         String email = token.getPrincipal().getAttribute("email");
         boolean usuarioRegistrado = usuarioService.existsByEmail(email);
 
-        String redirectUrl = usuarioRegistrado ? "http://localhost:3000/inicio" : "http://localhost:3000/register";
+        String redirectUrl = usuarioRegistrado ? "https://c24-4-2024-1-g6-b-reservatec-frontend-react.vercel.app/inicio" : "https://c24-4-2024-1-g6-b-reservatec-frontend-react.vercel.app/register";
         return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
     }
 
