@@ -36,7 +36,7 @@ public class SecurityConfig {
                 })
                 .sessionManagement(session -> session
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(3)
                         .sessionRegistry(sessionRegistry())
                         .maxSessionsPreventsLogin(false)
