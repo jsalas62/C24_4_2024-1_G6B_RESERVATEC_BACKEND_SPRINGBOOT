@@ -39,16 +39,14 @@ public class SecurityConfig {
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session
-                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(1) // Reducing to 1 for simplicity, adjust as needed
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .maximumSessions(1)
                         .sessionRegistry(sessionRegistry())
-                        .maxSessionsPreventsLogin(false)
-                        .expiredUrl("/login?error=session_expired"))
+                        .expiredUrl("/login"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler(logoutSuccessHandler)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("SESSION")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true))
                 .csrf(csrf -> csrf.disable())
@@ -81,7 +79,7 @@ public class SecurityConfig {
     @Bean
     public DefaultCookieSerializer cookieSerializer() {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setSameSite("Strict"); // Consider setting this to "Lax" or "Strict"
+        serializer.setSameSite("Lax"); // Consider setting this to "Lax" or "Strict"
         serializer.setUseSecureCookie(true); // Ensure this is true for HTTPS
         return serializer;
     }
