@@ -83,7 +83,7 @@ public class SecurityConfig {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
         serializer.setCookieName("session");
         serializer.setSameSite("None");
-        serializer.setUseSecureCookie(true); // Asegúrate de que esto esté en true si usas HTTPS
+        serializer.setUseSecureCookie(false); // Asegúrate de que esto esté en true si usas HTTPS
         return serializer;
     }
 }
