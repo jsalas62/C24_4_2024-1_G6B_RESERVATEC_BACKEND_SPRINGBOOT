@@ -35,11 +35,9 @@ public class SecurityConfig {
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session
-                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .maximumSessions(3)
+                        .maximumSessions(5)
                         .sessionRegistry(sessionRegistry())
-                        .maxSessionsPreventsLogin(false)
                         .expiredUrl("/login?error=session_expired"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
