@@ -39,20 +39,22 @@ public class SecurityConfig {
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .maximumSessions(1)
+                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        .maximumSessions(1000)
                         .sessionRegistry(sessionRegistry())
-                        .expiredUrl("/login"))
+                        .maxSessionsPreventsLogin(false)
+                        .expiredUrl("/login?error=session_expired"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessHandler(logoutSuccessHandler)
-                        .deleteCookies("SESSION")
+                        .logoutSuccessHandler(logoutSuccessHandler) // Maneja la redirección después del logout
+                        .deleteCookies("session")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true))
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/google")
-                        .successHandler(successHandler)
+                        .loginPage("/oauth2/authorization/google") // Redirige directamente a la URL de autorización
+                        .successHandler(successHandler) // Maneja la redirección después de un inicio de sesión exitoso
                 )
                 .formLogin(withDefaults())
                 .build();
@@ -79,8 +81,9 @@ public class SecurityConfig {
     @Bean
     public DefaultCookieSerializer cookieSerializer() {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setSameSite("Lax"); // Consider setting this to "Lax" or "Strict"
-        serializer.setUseSecureCookie(true); // Ensure this is true for HTTPS
+        serializer.setCookieName("session");
+        serializer.setSameSite("None");
+        serializer.setUseSecureCookie(true); // Asegúrate de que esto esté en true si usas HTTPS
         return serializer;
     }
 }
