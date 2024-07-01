@@ -43,7 +43,7 @@ public class UsuarioController {
         String email = token.getPrincipal().getAttribute("email");
         boolean usuarioRegistrado = usuarioService.existsByEmail(email);
 
-        String redirectUrl = usuarioRegistrado ? "http://localhost:5173/inicio" : "http://localhost:5173/register";
+        String redirectUrl = usuarioRegistrado ? "http://localhost:3000/inicio" : "http://localhost:3000/register";
         return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
     }
 
