@@ -43,7 +43,7 @@ public class UsuarioController {
         String email = token.getPrincipal().getAttribute("email");
         boolean usuarioRegistrado = usuarioService.existsByEmail(email);
 
-        String redirectUrl = usuarioRegistrado ? "https://balanced-delight-production.up.railway.app/inicio" : "https://balanced-delight-production.up.railway.app/register";
+        String redirectUrl = usuarioRegistrado ? "https://strong-laughter-production.up.railway.app/inicio" : "https://strong-laughter-production.up.railway.app/register";
         return ResponseEntity.status(HttpStatus.FOUND).header("Location", redirectUrl).build();
     }
 
