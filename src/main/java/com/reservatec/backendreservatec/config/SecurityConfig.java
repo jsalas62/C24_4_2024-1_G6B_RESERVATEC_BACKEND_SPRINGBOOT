@@ -38,13 +38,15 @@ public class SecurityConfig {
                     auth.requestMatchers("/favicon.ico").permitAll();
                     auth.anyRequest().authenticated();
                 })
-                .sessionManagement(session -> session
-                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(3)
-                        .sessionRegistry(sessionRegistry())
-                        .maxSessionsPreventsLogin(false)
-                        .expiredUrl("/login?error=session_expired"))
+                .sessionManagement(
+
+                        session -> session
+                                .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
+                                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                                .maximumSessions(3)
+                                .sessionRegistry(sessionRegistry())
+                                .maxSessionsPreventsLogin(false)
+                                .expiredUrl("/login?error=session_expired"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler(logoutSuccessHandler) // Maneja la redirección después del logout
@@ -59,7 +61,6 @@ public class SecurityConfig {
                 .formLogin(withDefaults())
                 .build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -70,6 +71,7 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 
